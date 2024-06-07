@@ -22,6 +22,21 @@ class ToDoTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final List<Color> tileColors = [
+      Colors.blue[200]!,
+      Colors.green[200]!,
+      Colors.orange[200]!,
+      Colors.purple[200]!,
+      Colors.red[200]!,
+      Colors.yellow[200]!,
+    ];
+
+    final DateTime now = DateTime.now();
+    final int index = dueDate != null
+        ? dueDate!.difference(now).inDays % tileColors.length
+        : now.microsecondsSinceEpoch % tileColors.length;
+    final Color cardColor = tileColors[index];
+
     return Slidable(
       endActionPane: ActionPane(
         motion: const DrawerMotion(),
@@ -40,7 +55,7 @@ class ToDoTile extends StatelessWidget {
           borderRadius: BorderRadius.circular(8.0),
         ),
         elevation: 2.0,
-        color: Colors.grey[900],
+        color: cardColor,
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
@@ -50,9 +65,10 @@ class ToDoTile extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Checkbox(
+                    side: const BorderSide(color: Colors.black, width: 2),
                     value: taskCompleted,
                     onChanged: onChanged,
-                    activeColor: const Color.fromARGB(255, 0, 200, 255),
+                    activeColor: const Color.fromARGB(255, 0, 0, 0),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
@@ -64,14 +80,15 @@ class ToDoTile extends StatelessWidget {
                             : TextDecoration.none,
                         fontSize: 16.0,
                         fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                        color: Colors.black, // Text color is set to black
                       ),
                     ),
                   ),
                 ],
               ),
               Expanded(
-                  child: Container()), // Pushes the date and time to the bottom
+                child: Container(), // Pushes the date and time to the bottom
+              ),
               Align(
                 alignment: Alignment.bottomRight,
                 child: Column(
@@ -80,7 +97,7 @@ class ToDoTile extends StatelessWidget {
                     Text(
                       '${DateFormat('d MMMM, yyyy').format(createdAt)} | ${DateFormat('h:mm a').format(createdAt)}',
                       style: const TextStyle(
-                        color: Colors.grey,
+                        color: Color.fromARGB(255, 0, 0, 0),
                         fontSize: 12,
                       ),
                     ),
@@ -88,7 +105,7 @@ class ToDoTile extends StatelessWidget {
                       Text(
                         'Due: ${DateFormat('d MMMM, yyyy').format(dueDate!)}',
                         style: const TextStyle(
-                          color: Colors.redAccent,
+                          color: Color.fromARGB(255, 33, 0, 0),
                           fontSize: 12,
                         ),
                       ),

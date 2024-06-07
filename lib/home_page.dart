@@ -3,6 +3,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import '../data/database.dart';
 import '../util/dialog_box.dart';
 import '../util/todo_tile.dart';
+import 'package:animated_text_kit/animated_text_kit.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -76,23 +77,25 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 100,
-        title: const Column(
+        title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(height: 16),
-            Text(
+            const SizedBox(height: 16),
+            const Text(
               'Welcome Back',
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
             ),
-            SizedBox(height: 8),
-            Text(
-              'What are you up to?',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
+            const SizedBox(height: 8),
+            AnimatedTextKit(repeatForever: true, animatedTexts: [
+              TyperAnimatedText(
+                'What are your plans ?',
+                speed: const Duration(milliseconds: 100),
+                textStyle: const TextStyle(
+                    color: Color.fromARGB(255, 168, 167, 167),
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold),
               ),
-            ),
+            ]),
           ],
         ),
       ),
