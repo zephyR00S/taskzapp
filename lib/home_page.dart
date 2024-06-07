@@ -42,7 +42,7 @@ class _HomePageState extends State<HomePage> {
   // save new task
   void saveNewTask() {
     setState(() {
-      db.toDoList.add([_controller.text, false]);
+      db.toDoList.add([_controller.text, false, DateTime.now()]);
       _controller.clear();
     });
     Navigator.of(context).pop();
@@ -100,19 +100,23 @@ class _HomePageState extends State<HomePage> {
         onPressed: createNewTask,
         child: const Icon(Icons.add),
       ),
-      body: Container(
-        margin: const EdgeInsets.only(top: 20.0),
-        child: ListView.builder(
-          itemCount: db.toDoList.length,
-          itemBuilder: (context, index) {
-            return ToDoTile(
-              taskName: db.toDoList[index][0],
-              taskCompleted: db.toDoList[index][1],
-              onChanged: (value) => checkBoxChanged(value, index),
-              deleteFunction: (context) => deleteTask(index),
-            );
-          },
+      body: GridView.builder(
+        padding: const EdgeInsets.all(16.0),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2, // Number of columns in the grid
+          crossAxisSpacing: 16.0, // Spacing between columns
+          mainAxisSpacing: 16.0, // Spacing between rows
         ),
+        itemCount: db.toDoList.length,
+        itemBuilder: (context, index) {
+          return ToDoTile(
+            taskName: db.toDoList[index][0],
+            taskCompleted: db.toDoList[index][1],
+            createdAt: db.toDoList[index][2],
+            onChanged: (value) => checkBoxChanged(value, index),
+            deleteFunction: (context) => deleteTask(index),
+          );
+        },
       ),
     );
   }

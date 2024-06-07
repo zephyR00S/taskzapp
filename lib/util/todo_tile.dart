@@ -1,62 +1,73 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:intl/intl.dart';
 
 class ToDoTile extends StatelessWidget {
   final String taskName;
   final bool taskCompleted;
   final Function(bool?)? onChanged;
   final Function(BuildContext)? deleteFunction;
+  final DateTime createdAt;
 
   const ToDoTile({
-    super.key,
+    Key? key,
     required this.taskName,
     required this.taskCompleted,
     required this.onChanged,
     required this.deleteFunction,
-  });
+    required this.createdAt,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 25.0, right: 25, top: 25),
-      child: Slidable(
-        endActionPane: ActionPane(
-          motion: const StretchMotion(),
+    return Card(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8.0),
+      ),
+      elevation: 2.0,
+      color: Colors.grey[900],
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SlidableAction(
-              onPressed: deleteFunction,
-              icon: Icons.delete,
-              backgroundColor: const Color.fromARGB(255, 219, 0, 0),
-              borderRadius: BorderRadius.circular(12),
-            )
-          ],
-        ),
-        child: Container(
-          padding: const EdgeInsets.all(5),
-          decoration: BoxDecoration(
-            color: const Color.fromARGB(255, 62, 62, 62),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Row(
-            children: [
-              // checkbox
-              Checkbox(
-                value: taskCompleted,
-                onChanged: onChanged,
-                activeColor: const Color.fromARGB(255, 0, 200, 255),
-              ),
-
-              // task name
-              Text(
-                taskName,
-                style: TextStyle(
-                  decoration: taskCompleted
-                      ? TextDecoration.lineThrough
-                      : TextDecoration.none,
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Checkbox(
+                  value: taskCompleted,
+                  onChanged: onChanged,
+                  activeColor: const Color.fromARGB(255, 0, 200, 255),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    taskName,
+                    style: TextStyle(
+                      decoration: taskCompleted
+                          ? TextDecoration.lineThrough
+                          : TextDecoration.none,
+                      fontSize: 16.0,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            Expanded(
+                child: Container()), // Pushes the date and time to the bottom
+            Align(
+              alignment: Alignment.bottomRight,
+              child: Text(
+                '${DateFormat('d MMMM, yyyy').format(createdAt)} | ${DateFormat('h:mm a').format(createdAt)}',
+                style: const TextStyle(
+                  color: Colors.grey,
+                  fontSize: 12,
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
