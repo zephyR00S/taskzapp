@@ -1,23 +1,20 @@
 import 'package:flutter/material.dart';
 
 class MyButton extends StatelessWidget {
-  final String text;
   final VoidCallback onPressed;
+  final IconData iconData;
+
   const MyButton({
     super.key,
-    required this.text,
     required this.onPressed,
+    required this.iconData,
   });
 
   @override
   Widget build(BuildContext context) {
-    return MaterialButton(
+    return IconButton(
       onPressed: onPressed,
-      color: const Color.fromARGB(255, 16, 16, 16),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Text(text),
+      icon: Icon(iconData),
     );
   }
 }
