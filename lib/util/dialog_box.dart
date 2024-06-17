@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-
 import 'my_button.dart';
 
 class DialogBox extends StatefulWidget {
   final TextEditingController controller;
-  final Function(DateTime?) onSave;
+  final Function(DateTime?, String) onSave;
   final VoidCallback onCancel;
 
   const DialogBox({
@@ -20,17 +19,23 @@ class DialogBox extends StatefulWidget {
 
 class _DialogBoxState extends State<DialogBox> {
   DateTime? _selectedDate;
+  String? _selectedCategory;
+  final List<String> _categories = [
+    'default',
+    'personal',
+    'home',
+    'work'
+  ]; // Categories list
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
       backgroundColor: const Color.fromARGB(230, 0, 0, 0),
       content: SizedBox(
-        height: 200,
+        height: 250, // Increased height to accommodate dropdown
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            // Get user input
             Container(
               margin: const EdgeInsets.only(top: 10),
               child: TextField(
@@ -80,7 +85,6 @@ class _DialogBoxState extends State<DialogBox> {
             ),
 
             const SizedBox(height: 10),
-            // Date field and Select Date button
             Row(
               children: [
                 Expanded(
@@ -90,7 +94,7 @@ class _DialogBoxState extends State<DialogBox> {
                       labelText: 'Due Date',
                       border: const OutlineInputBorder(),
                       suffixIcon: IconButton(
-                        icon: const Icon(Icons.calendar_month_outlined),
+                        icon: const Icon(Icons.calendar_today),
                         onPressed: () {
                           _showDatePicker(context);
                         },
@@ -105,6 +109,34 @@ class _DialogBoxState extends State<DialogBox> {
                 ),
               ],
             ),
+
+            const SizedBox(height: 10),
+            // Dropdown for Categories
+            Row(
+              children: [
+                Expanded(
+                  child: DropdownButtonFormField<String>(
+                    value: _selectedCategory,
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedCategory = value;
+                      });
+                    },
+                    decoration: const InputDecoration(
+                      labelText: 'Category',
+                      border: OutlineInputBorder(),
+                    ),
+                    items: _categories.map((String category) {
+                      return DropdownMenuItem<String>(
+                        value: category,
+                        child: Text(category),
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ],
+            ),
+
             // Buttons: Save + Cancel
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 10.0),
@@ -115,15 +147,18 @@ class _DialogBoxState extends State<DialogBox> {
                   MyButton(
                     iconData: Icons.check,
                     onPressed: () {
-                      setState(() {
-                        widget.onSave(_selectedDate);
-                        _selectedDate = null; // Reset the selected date
-                      });
+                      widget.onSave(
+                          _selectedDate, _selectedCategory ?? 'default');
+                      _selectedDate = null; // Reset the selected date
+                      _selectedCategory = null; // Reset the selected category
                     },
                   ),
                   const SizedBox(width: 20),
                   // Cancel button
-                  MyButton(iconData: Icons.cancel, onPressed: widget.onCancel),
+                  MyButton(
+                    iconData: Icons.cancel,
+                    onPressed: widget.onCancel,
+                  ),
                 ],
               ),
             ),

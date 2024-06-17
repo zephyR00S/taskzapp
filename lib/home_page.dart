@@ -41,9 +41,10 @@ class _HomePageState extends State<HomePage> {
   }
 
   // save new task
-  void saveNewTask(DateTime? dueDate) {
+  void saveNewTask(DateTime? dueDate, String? category) {
     setState(() {
-      db.toDoList.add([_controller.text, false, DateTime.now(), dueDate]);
+      db.toDoList
+          .add([_controller.text, false, DateTime.now(), dueDate, category]);
       _controller.clear();
     });
     Navigator.of(context).pop();
@@ -117,6 +118,7 @@ class _HomePageState extends State<HomePage> {
             taskCompleted: db.toDoList[index][1],
             createdAt: db.toDoList[index][2],
             dueDate: db.toDoList[index][3],
+            category: db.toDoList[index][4],
             onChanged: (value) => checkBoxChanged(value, index),
             deleteFunction: (context) => deleteTask(index),
           );

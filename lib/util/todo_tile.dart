@@ -9,16 +9,18 @@ class ToDoTile extends StatelessWidget {
   final Function(BuildContext)? deleteFunction;
   final DateTime createdAt;
   final DateTime? dueDate; // Added dueDate parameter
+  final String? category;
 
   const ToDoTile({
-    Key? key,
+    super.key,
     required this.taskName,
     required this.taskCompleted,
     required this.onChanged,
     required this.deleteFunction,
     required this.createdAt,
-    required this.dueDate, // Added dueDate to the constructor
-  }) : super(key: key);
+    required this.dueDate,
+    required this.category,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -109,6 +111,9 @@ class ToDoTile extends StatelessWidget {
                           fontSize: 12,
                         ),
                       ),
+                    Text(
+                      'Category : $category ',
+                    )
                   ],
                 ),
               ),
