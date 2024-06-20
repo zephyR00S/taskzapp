@@ -75,6 +75,8 @@ class ToDoTile extends StatelessWidget {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
                       taskName,
                       style: TextStyle(
                         decoration: taskCompleted

@@ -47,21 +47,44 @@ class _HomePageState extends State<HomePage> {
           .add([_controller.text, false, DateTime.now(), dueDate, category]);
       _controller.clear();
     });
-    Navigator.of(context).pop();
+
     db.updateDataBase();
+    const snackBarMessage = 'Task Added !';
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text(
+          snackBarMessage,
+          style: TextStyle(
+            color: Colors.white, // Text color
+            fontWeight: FontWeight.bold, // Bold text
+            fontSize: 16, // Optional: Adjust font size as needed
+          ),
+        ),
+        duration: const Duration(seconds: 1), // Duration to show the snackbar
+        backgroundColor: Colors.green[600], // Background color
+        behavior: SnackBarBehavior.floating, // Rounded corners
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        margin: EdgeInsets.only(
+            bottom: MediaQuery.of(context).size.height - 155,
+            right: 20,
+            left: 20),
+      ),
+    );
   }
 
   // create a new task
   void createNewTask() {
-    showDialog(
+    showModalBottomSheet(
       context: context,
-      builder: (context) {
-        return DialogBox(
-          controller: _controller,
-          onSave: saveNewTask,
-          onCancel: () => Navigator.of(context).pop(),
-        );
-      },
+      isScrollControlled: true,
+      builder: (context) => DialogBox(
+        controller: _controller,
+        onSave: saveNewTask,
+        onCancel: () => Navigator.pop(context),
+      ),
     );
   }
 
@@ -71,6 +94,31 @@ class _HomePageState extends State<HomePage> {
       db.toDoList.removeAt(index);
     });
     db.updateDataBase();
+
+    const snackBarMessage = 'Task Deleted !';
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text(
+          snackBarMessage,
+          style: TextStyle(
+            color: Colors.white, // Text color
+            fontWeight: FontWeight.bold, // Bold text
+            fontSize: 16, // Optional: Adjust font size as needed
+          ),
+        ),
+        duration: const Duration(seconds: 1), // Duration to show the snackbar
+        backgroundColor: Colors.red[600], // Background color
+        behavior: SnackBarBehavior.floating, // Rounded corners
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        margin: EdgeInsets.only(
+            bottom: MediaQuery.of(context).size.height - 155,
+            right: 20,
+            left: 20),
+      ),
+    );
   }
 
   @override
