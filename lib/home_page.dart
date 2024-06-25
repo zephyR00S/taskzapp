@@ -1,81 +1,58 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+
 import '../data/database.dart';
 import '../util/dialog_box.dart';
 import '../util/todo_tile.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  final ToDoDataBase db;
+  const HomePage({super.key, required this.db});
 
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-  // reference the hive box
   final _myBox = Hive.box('mybox');
-  ToDoDataBase db = ToDoDataBase();
 
   @override
   void initState() {
-    // if this is the 1st time ever opening the app, then create default data
-    if (_myBox.get("TODOLIST") == null) {
-      db.createInitialData();
-    } else {
-      // there already exists data
-      db.loadData();
-    }
     super.initState();
+    _initializeData();
   }
 
-  // text controller
+  Future<void> _initializeData() async {
+    if (_myBox.get("TODOLIST") == null) {
+      await widget.db.createInitialData();
+    } else {
+      await widget.db.loadData();
+    }
+    setState(() {}); // Trigger a rebuild after data is loaded
+  }
+
   final _controller = TextEditingController();
 
-  // checkbox was tapped
   void checkBoxChanged(bool? value, int index) {
     setState(() {
-      db.toDoList[index][1] = !db.toDoList[index][1];
+      widget.db.toDoList[index][1] = !widget.db.toDoList[index][1];
     });
-    db.updateDataBase();
+    widget.db.updateDataBase();
   }
 
-  // save new task
-  void saveNewTask(DateTime? dueDate, String? category) {
+  Future<void> saveNewTask(DateTime? dueDate, String? category) async {
     setState(() {
-      db.toDoList
+      widget.db.toDoList
           .add([_controller.text, false, DateTime.now(), dueDate, category]);
       _controller.clear();
     });
-
-    db.updateDataBase();
-    const snackBarMessage = 'Task Added !';
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text(
-          snackBarMessage,
-          style: TextStyle(
-            color: Colors.white, // Text color
-            fontWeight: FontWeight.bold, // Bold text
-            fontSize: 16, // Optional: Adjust font size as needed
-          ),
-        ),
-        duration: const Duration(seconds: 1), // Duration to show the snackbar
-        backgroundColor: Colors.green[600], // Background color
-        behavior: SnackBarBehavior.floating, // Rounded corners
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
-        margin: EdgeInsets.only(
-            bottom: MediaQuery.of(context).size.height - 155,
-            right: 20,
-            left: 20),
-      ),
-    );
+    await widget.db.updateDataBase();
+    _showSnackBar('Task Added !', Colors.green[600]!);
   }
 
-  // create a new task
   void createNewTask() {
     showModalBottomSheet(
       context: context,
@@ -88,35 +65,35 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // delete task
-  void deleteTask(int index) {
+  Future<void> deleteTask(int index) async {
     setState(() {
-      db.toDoList.removeAt(index);
+      widget.db.toDoList.removeAt(index);
     });
-    db.updateDataBase();
+    await widget.db.updateDataBase();
+    _showSnackBar('Task Deleted !', Colors.red[600]!);
+  }
 
-    const snackBarMessage = 'Task Deleted !';
-
+  void _showSnackBar(String message, Color backgroundColor) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: const Text(
-          snackBarMessage,
-          style: TextStyle(
-            color: Colors.white, // Text color
-            fontWeight: FontWeight.bold, // Bold text
-            fontSize: 16, // Optional: Adjust font size as needed
+        content: Text(
+          message,
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
           ),
         ),
-        duration: const Duration(seconds: 1), // Duration to show the snackbar
-        backgroundColor: Colors.red[600], // Background color
-        behavior: SnackBarBehavior.floating, // Rounded corners
+        duration: const Duration(seconds: 1),
+        backgroundColor: backgroundColor,
+        behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
         ),
         margin: EdgeInsets.only(
-            bottom: MediaQuery.of(context).size.height - 155,
-            right: 20,
-            left: 20),
+            bottom: MediaQuery.of(context).size.height - 187,
+            right: 15,
+            left: 15),
       ),
     );
   }
@@ -124,54 +101,54 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        toolbarHeight: 100,
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 16),
-            const Text(
-              'Welcome Back',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
-            ),
-            const SizedBox(height: 8),
-            AnimatedTextKit(repeatForever: true, animatedTexts: [
-              TyperAnimatedText(
-                'What are your plans ?',
-                speed: const Duration(milliseconds: 100),
-                textStyle: const TextStyle(
-                    color: Color.fromARGB(255, 168, 167, 167),
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold),
+        appBar: AppBar(
+          toolbarHeight: 150,
+          title: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 24),
+              Text(
+                'Welcome',
+                style: GoogleFonts.blackOpsOne(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 48,
+                    textStyle: const TextStyle(letterSpacing: 1, height: 1.5)),
               ),
-            ]),
-          ],
+              const SizedBox(height: 8),
+              AnimatedTextKit(repeatForever: true, animatedTexts: [
+                TyperAnimatedText(
+                  'What are your plans ?',
+                  speed: const Duration(milliseconds: 100),
+                  textStyle: const TextStyle(
+                      color: Color.fromARGB(255, 168, 167, 167),
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold),
+                ),
+              ]),
+            ],
+          ),
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: createNewTask,
-        child: const Icon(Icons.add),
-      ),
-      body: GridView.builder(
-        padding: const EdgeInsets.all(16.0),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2, // Number of columns in the grid
-          crossAxisSpacing: 16.0, // Spacing between columns
-          mainAxisSpacing: 16.0, // Spacing between rows
+        floatingActionButton: FloatingActionButton(
+          onPressed: createNewTask,
+          child: const Icon(Icons.add),
         ),
-        itemCount: db.toDoList.length,
-        itemBuilder: (context, index) {
-          return ToDoTile(
-            taskName: db.toDoList[index][0],
-            taskCompleted: db.toDoList[index][1],
-            createdAt: db.toDoList[index][2],
-            dueDate: db.toDoList[index][3],
-            category: db.toDoList[index][4],
-            onChanged: (value) => checkBoxChanged(value, index),
-            deleteFunction: (context) => deleteTask(index),
-          );
-        },
-      ),
-    );
+        body: MasonryGridView.count(
+          padding: const EdgeInsets.only(top: 16.0),
+          crossAxisCount: 2,
+          mainAxisSpacing: 8.0,
+          crossAxisSpacing: 8.0,
+          itemCount: widget.db.toDoList.length,
+          itemBuilder: (context, index) {
+            return ToDoTile(
+              taskName: widget.db.toDoList[index][0],
+              taskCompleted: widget.db.toDoList[index][1],
+              createdAt: widget.db.toDoList[index][2],
+              dueDate: widget.db.toDoList[index][3],
+              category: widget.db.toDoList[index][4],
+              onChanged: (value) => checkBoxChanged(value, index),
+              deleteFunction: (context) => deleteTask(index),
+            );
+          },
+        ));
   }
 }

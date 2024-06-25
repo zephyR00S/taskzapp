@@ -48,94 +48,104 @@ class _DialogBoxState extends State<DialogBox> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          TextField(
-            controller: widget.controller,
-            decoration: InputDecoration(
-              hintText: "Add a new task ...",
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(5),
-              ),
-              prefixIcon: const Icon(Icons.add_circle),
-            ),
-          ),
-          const SizedBox(height: 10),
-          Row(
+    return Padding(
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+      ),
+      child: SingleChildScrollView(
+        child: Container(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Expanded(
-                child: TextField(
-                  readOnly: true,
-                  decoration: InputDecoration(
-                    labelText: 'Due Date',
-                    border: const OutlineInputBorder(),
-                    suffixIcon: IconButton(
-                      icon: const Icon(Icons.calendar_today),
-                      onPressed: () {
-                        _showDatePicker(context);
-                      },
+              TextField(
+                controller: widget.controller,
+                decoration: InputDecoration(
+                  hintText: "Add a new task ...",
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                  prefixIcon: const Icon(Icons.add_circle),
+                ),
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      readOnly: true,
+                      decoration: InputDecoration(
+                        labelText: 'Due Date',
+                        border: const OutlineInputBorder(),
+                        suffixIcon: IconButton(
+                          icon: const Icon(Icons.calendar_today),
+                          onPressed: () {
+                            _showDatePicker(context);
+                          },
+                        ),
+                      ),
+                      controller: TextEditingController(
+                        text: _selectedDate != null
+                            ? '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}'
+                            : '',
+                      ),
                     ),
                   ),
-                  controller: TextEditingController(
-                    text: _selectedDate != null
-                        ? '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}'
-                        : '',
+                ],
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  Expanded(
+                    child: DropdownButtonFormField<String>(
+                      value: _selectedCategory,
+                      onChanged: (value) {
+                        setState(() {
+                          _selectedCategory = value;
+                        });
+                      },
+                      decoration: const InputDecoration(
+                        labelText: 'Category',
+                        border: OutlineInputBorder(),
+                      ),
+                      items: _categories.map((String category) {
+                        return DropdownMenuItem<String>(
+                          value: category,
+                          child: Text(category),
+                        );
+                      }).toList(),
+                    ),
                   ),
-                ),
+                ],
               ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              Expanded(
-                child: DropdownButtonFormField<String>(
-                  value: _selectedCategory,
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedCategory = value;
-                    });
-                  },
-                  decoration: const InputDecoration(
-                    labelText: 'Category',
-                    border: OutlineInputBorder(),
+              const SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  MyButton(
+                    iconData: Icons.check,
+                    onPressed: () {
+                      widget.onSave(
+                          _selectedDate, _selectedCategory ?? 'default');
+                      _selectedDate = null;
+                      _selectedCategory = null;
+                      Navigator.of(context).pop(); // Dismiss the bottom sheet
+                    },
                   ),
-                  items: _categories.map((String category) {
-                    return DropdownMenuItem<String>(
-                      value: category,
-                      child: Text(category),
-                    );
-                  }).toList(),
-                ),
+                  const SizedBox(width: 20),
+                  MyButton(
+                    iconData: Icons.cancel,
+                    onPressed: () {
+                      widget.onCancel();
+                    },
+                  ),
+                ],
               ),
+              // Add extra padding at the bottom
+              const SizedBox(height: 20),
             ],
           ),
-          const SizedBox(height: 10),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              MyButton(
-                iconData: Icons.check,
-                onPressed: () {
-                  widget.onSave(_selectedDate, _selectedCategory ?? 'default');
-                  _selectedDate = null;
-                  _selectedCategory = null;
-                  Navigator.of(context).pop(); // Dismiss the bottom sheet
-                },
-              ),
-              const SizedBox(width: 20),
-              MyButton(
-                iconData: Icons.cancel,
-                onPressed: () {
-                  widget.onCancel();
-                },
-              ),
-            ],
-          ),
-        ],
+        ),
       ),
     );
   }
