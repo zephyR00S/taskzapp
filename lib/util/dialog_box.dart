@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 import 'my_button.dart';
 
 class DialogBox extends StatefulWidget {
@@ -48,7 +49,9 @@ class _DialogBoxState extends State<DialogBox> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 350),
+      curve: Curves.easeOutQuad,
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom,
       ),
@@ -58,6 +61,17 @@ class _DialogBoxState extends State<DialogBox> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              SizedBox(
+                height: 150,
+                // Adjust the height as needed
+                child: Lottie.asset(
+                    'assets/Lottie/Animation - 1719331492962.json',
+                    fit: BoxFit.contain,
+                    frameRate: const FrameRate(60)),
+              ),
+              const SizedBox(
+                height: 10,
+              ),
               TextField(
                 controller: widget.controller,
                 decoration: InputDecoration(
@@ -75,7 +89,7 @@ class _DialogBoxState extends State<DialogBox> {
                     child: TextField(
                       readOnly: true,
                       decoration: InputDecoration(
-                        labelText: 'Due Date',
+                        labelText: 'Date',
                         border: const OutlineInputBorder(),
                         suffixIcon: IconButton(
                           icon: const Icon(Icons.calendar_today),
@@ -123,26 +137,24 @@ class _DialogBoxState extends State<DialogBox> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   MyButton(
+                    iconData: Icons.cancel,
+                    onPressed: () {
+                      widget.onCancel();
+                    },
+                  ),
+                  const SizedBox(width: 20),
+                  MyButton(
                     iconData: Icons.check,
                     onPressed: () {
                       widget.onSave(
                           _selectedDate, _selectedCategory ?? 'default');
                       _selectedDate = null;
                       _selectedCategory = null;
-                      Navigator.of(context).pop(); // Dismiss the bottom sheet
-                    },
-                  ),
-                  const SizedBox(width: 20),
-                  MyButton(
-                    iconData: Icons.cancel,
-                    onPressed: () {
-                      widget.onCancel();
+                      Navigator.of(context).pop();
                     },
                   ),
                 ],
               ),
-              // Add extra padding at the bottom
-              const SizedBox(height: 20),
             ],
           ),
         ),
