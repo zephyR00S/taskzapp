@@ -7,6 +7,9 @@ class ToDoDataBase {
   Db? _mongodb;
   DbCollection? _collection;
   bool _isMongoInitialized = false;
+  final String userId;
+
+  ToDoDataBase(this.userId);
 
   // Initialize MongoDB connection
   Future<void> initMongoDB() async {
@@ -15,7 +18,7 @@ class ToDoDataBase {
           'mongodb+srv://demo_user:lriPyQpFZTWPAp3z@cluster0.3fh7itg.mongodb.net/taskapp?retryWrites=true&w=majority&appName=Cluster0';
       _mongodb = await Db.create(uri);
       await _mongodb!.open();
-      _collection = _mongodb!.collection('todos');
+      _collection = _mongodb!.collection('todos_$userId');
       _isMongoInitialized = true;
     }
   }
@@ -30,13 +33,13 @@ class ToDoDataBase {
 
   // Load data from Hive and sync with MongoDB
   Future<void> loadData() async {
-    toDoList = _myBox.get("TODOLIST") ?? [];
+    toDoList = _myBox.get("TODOLIST_$userId") ?? [];
     await syncWithMongoDB();
   }
 
   // Update both Hive and MongoDB
   Future<void> updateDataBase() async {
-    await _myBox.put("TODOLIST", toDoList);
+    await _myBox.put("TODOLIST_$userId", toDoList);
     await syncWithMongoDB();
   }
 
@@ -77,7 +80,7 @@ class ToDoDataBase {
                 todo['category'],
               ])
           .toList();
-      await _myBox.put("TODOLIST", toDoList);
+      await _myBox.put("TODOLIST_$userId", toDoList);
     } catch (e) {
       print('Error fetching from MongoDB: $e');
     }

@@ -8,7 +8,8 @@ void main() async {
   await Hive.initFlutter();
   await Hive.openBox('mybox');
 
-  final todoDatabase = ToDoDataBase();
+  const String userId = 'user1';
+  final todoDatabase = ToDoDataBase(userId);
 
   runApp(MyApp(todoDatabase: todoDatabase));
 }

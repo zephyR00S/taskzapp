@@ -1,32 +1,34 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:taskzapp/data/database.dart';
 
 import 'package:taskzapp/main.dart';
 
+import 'package:taskzapp/util/dialog_box.dart'; // Import your HomePage
+
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
+  testWidgets('Todo app smoke test', (WidgetTester tester) async {
+    // Create a mock database
+
     // Build our app and trigger a frame.
-    final mockDatabase = ToDoDataBase();
-    await tester.pumpWidget(MyApp(todoDatabase: mockDatabase));
+    await tester.pumpWidget(MyApp());
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    // Verify that the welcome text is present
+    expect(find.text('Welcome'), findsOneWidget);
 
-    // Tap the '+' icon and trigger a frame.
+    // Verify that the "What are your plans ?" text is present
+    expect(find.text('What are your plans ?'), findsOneWidget);
+
+    // Verify that the add button is present
+    expect(find.byIcon(Icons.add), findsOneWidget);
+
+    // Tap the add button and trigger a frame
     await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+    await tester.pumpAndSettle();
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    // Verify that the dialog box appears
+    expect(find.byType(DialogBox), findsOneWidget);
+
+    // You can add more specific tests here, such as adding a todo item,
+    // checking if it appears in the list, marking it as complete, etc.
   });
 }
