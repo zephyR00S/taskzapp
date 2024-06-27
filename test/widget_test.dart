@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:taskzapp/data/database.dart';
 
 import 'package:taskzapp/main.dart';
 
@@ -8,9 +9,11 @@ import 'package:taskzapp/util/dialog_box.dart'; // Import your HomePage
 void main() {
   testWidgets('Todo app smoke test', (WidgetTester tester) async {
     // Create a mock database
-
+    final mockDatabase = ToDoDataBase('testUser');
     // Build our app and trigger a frame.
-    await tester.pumpWidget(MyApp());
+    await tester.pumpWidget(MyApp(
+      todoDatabase: mockDatabase,
+    ));
 
     // Verify that the welcome text is present
     expect(find.text('Welcome'), findsOneWidget);

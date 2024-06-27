@@ -7,7 +7,7 @@ class ToDoDataBase {
   Db? _mongodb;
   DbCollection? _collection;
   bool _isMongoInitialized = false;
-  final String userId;
+  final String userId; // Add userId to distinguish collections
 
   ToDoDataBase(this.userId);
 
@@ -18,7 +18,8 @@ class ToDoDataBase {
           'mongodb+srv://demo_user:lriPyQpFZTWPAp3z@cluster0.3fh7itg.mongodb.net/taskapp?retryWrites=true&w=majority&appName=Cluster0';
       _mongodb = await Db.create(uri);
       await _mongodb!.open();
-      _collection = _mongodb!.collection('todos_$userId');
+      _collection = _mongodb!
+          .collection('todos_$userId'); // Use userId for collection name
       _isMongoInitialized = true;
     }
   }

@@ -17,21 +17,24 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final _myBox = Hive.box('mybox');
+  late final Box _myBox;
 
   @override
   void initState() {
     super.initState();
+    _myBox = Hive.box('mybox');
     _initializeData();
   }
 
   Future<void> _initializeData() async {
-    if (_myBox.get("TODOLIST") == null) {
+    if (_myBox.get("TODOLIST_${widget.db.userId}") == null) {
       await widget.db.createInitialData();
     } else {
       await widget.db.loadData();
     }
-    setState(() {}); // Trigger a rebuild after data is loaded
+    if (mounted) {
+      setState(() {});
+    } // Trigger a rebuild after data is loaded
   }
 
   final _controller = TextEditingController();
