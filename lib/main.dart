@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-import 'package:taskzapp/util/login_screen.dart';
+import 'package:taskzapp/splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -14,7 +13,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: const LoginScreen(),
+      home: const SplashScreen(),
       theme: ThemeData.dark(useMaterial3: true),
     );
   }

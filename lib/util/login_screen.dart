@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:taskzapp/data/database.dart';
-import 'package:taskzapp/splash_screen.dart';
+import 'package:taskzapp/home_page.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -20,7 +20,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
       if (mounted) {
         Navigator.of(context).pushReplacement(MaterialPageRoute(
-          builder: (context) => SplashScreen(todoDatabase: todoDatabase),
+          builder: (context) => HomePage(db: todoDatabase),
         ));
       }
     } else {
