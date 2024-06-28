@@ -1,13 +1,11 @@
-import 'package:hive_flutter/hive_flutter.dart';
 import 'package:mongo_dart/mongo_dart.dart';
 
 class ToDoDataBase {
   List toDoList = [];
-  final _myBox = Hive.box('mybox');
   Db? _mongodb;
   DbCollection? _collection;
   bool _isMongoInitialized = false;
-  final String userId; // Add userId to distinguish collections
+  final String userId;
 
   ToDoDataBase(this.userId);
 
@@ -18,8 +16,7 @@ class ToDoDataBase {
           'mongodb+srv://demo_user:lriPyQpFZTWPAp3z@cluster0.3fh7itg.mongodb.net/taskapp?retryWrites=true&w=majority&appName=Cluster0';
       _mongodb = await Db.create(uri);
       await _mongodb!.open();
-      _collection = _mongodb!
-          .collection('todos_$userId'); // Use userId for collection name
+      _collection = _mongodb!.collection('todos_$userId');
       _isMongoInitialized = true;
     }
   }
@@ -32,40 +29,37 @@ class ToDoDataBase {
     await updateDataBase();
   }
 
-  // Load data from Hive and sync with MongoDB
+  // Load data from MongoDB
   Future<void> loadData() async {
-    toDoList = _myBox.get("TODOLIST_$userId") ?? [];
-    await syncWithMongoDB();
+    await initMongoDB();
+    await fetchFromMongoDB();
   }
 
-  // Update both Hive and MongoDB
+  // Update MongoDB
   Future<void> updateDataBase() async {
-    await _myBox.put("TODOLIST_$userId", toDoList);
-    await syncWithMongoDB();
-  }
-
-  // Sync Hive data with MongoDB
-  Future<void> syncWithMongoDB() async {
     await initMongoDB();
     try {
       // Clear existing data in MongoDB
       await _collection!.remove({});
-      // Insert all todos from Hive to MongoDB
-      for (var todo in toDoList) {
-        await _collection!.insert({
-          'title': todo[0],
-          'completed': todo[1],
-          'createdAt': todo[2].toIso8601String(),
-          'completedAt': todo[3]?.toIso8601String(),
-          'category': todo[4],
-        });
-      }
+      // Create a temporary list to avoid concurrent modification
+      //as  trying to modify a list while iterating over it, is not allowed in Dart.
+      final List<Map<String, dynamic>> updatedList = toDoList
+          .map((todo) => {
+                'title': todo[0],
+                'completed': todo[1],
+                'createdAt': todo[2].toIso8601String(),
+                'completedAt': todo[3]?.toIso8601String(),
+                'category': todo[4],
+              })
+          .toList();
+      // Insert all todos to MongoDB
+      await _collection!.insertMany(updatedList);
     } catch (e) {
-      print('Error syncing with MongoDB: $e');
+      print('Error updating MongoDB: $e');
     }
   }
 
-  // Fetch data from MongoDB and update Hive
+  // Fetch data from MongoDB
   Future<void> fetchFromMongoDB() async {
     await initMongoDB();
     try {
@@ -81,7 +75,6 @@ class ToDoDataBase {
                 todo['category'],
               ])
           .toList();
-      await _myBox.put("TODOLIST_$userId", toDoList);
     } catch (e) {
       print('Error fetching from MongoDB: $e');
     }

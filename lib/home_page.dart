@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:hive_flutter/hive_flutter.dart';
-
 import '../data/database.dart';
 import '../util/dialog_box.dart';
 import '../util/todo_tile.dart';
@@ -17,24 +15,24 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  late final Box _myBox;
+  bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _myBox = Hive.box('mybox');
     _initializeData();
   }
 
   Future<void> _initializeData() async {
-    if (_myBox.get("TODOLIST_${widget.db.userId}") == null) {
-      await widget.db.createInitialData();
-    } else {
-      await widget.db.loadData();
-    }
+    setState(() {
+      isLoading = true;
+    });
+    await widget.db.loadData(); // This now fetches data from MongoDB
     if (mounted) {
-      setState(() {});
-    } // Trigger a rebuild after data is loaded
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
 
   final _controller = TextEditingController();
@@ -135,23 +133,27 @@ class _HomePageState extends State<HomePage> {
           onPressed: createNewTask,
           child: const Icon(Icons.add),
         ),
-        body: MasonryGridView.count(
-          padding: const EdgeInsets.only(top: 16.0),
-          crossAxisCount: 2,
-          mainAxisSpacing: 8.0,
-          crossAxisSpacing: 8.0,
-          itemCount: widget.db.toDoList.length,
-          itemBuilder: (context, index) {
-            return ToDoTile(
-              taskName: widget.db.toDoList[index][0],
-              taskCompleted: widget.db.toDoList[index][1],
-              createdAt: widget.db.toDoList[index][2],
-              dueDate: widget.db.toDoList[index][3],
-              category: widget.db.toDoList[index][4],
-              onChanged: (value) => checkBoxChanged(value, index),
-              deleteFunction: (context) => deleteTask(index),
-            );
-          },
-        ));
+        body: isLoading
+            ? const Center(
+                child: CircularProgressIndicator(),
+              )
+            : MasonryGridView.count(
+                padding: const EdgeInsets.only(top: 16.0),
+                crossAxisCount: 2,
+                mainAxisSpacing: 8.0,
+                crossAxisSpacing: 8.0,
+                itemCount: widget.db.toDoList.length,
+                itemBuilder: (context, index) {
+                  return ToDoTile(
+                    taskName: widget.db.toDoList[index][0],
+                    taskCompleted: widget.db.toDoList[index][1],
+                    createdAt: widget.db.toDoList[index][2],
+                    dueDate: widget.db.toDoList[index][3],
+                    category: widget.db.toDoList[index][4],
+                    onChanged: (value) => checkBoxChanged(value, index),
+                    deleteFunction: (context) => deleteTask(index),
+                  );
+                },
+              ));
   }
 }
