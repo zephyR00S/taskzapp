@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:taskzapp/util/login_screen.dart';
+import 'package:simple_circular_progress_bar/simple_circular_progress_bar.dart';
 import '../data/database.dart';
 import '../util/dialog_box.dart';
 import '../util/todo_tile.dart';
@@ -16,11 +18,29 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   bool isLoading = true;
+  final ValueNotifier<double> completionPercentageNotifier =
+      ValueNotifier<double>(0);
 
   @override
   void initState() {
     super.initState();
     _initializeData();
+  }
+
+  void updateCompletionPercentage() {
+    int completedTasks =
+        widget.db.toDoList.where((task) => task[1] == true).length;
+    int totalTasks = widget.db.toDoList.length;
+    double newPercentage =
+        totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
+    completionPercentageNotifier.value = newPercentage;
+  }
+
+  void _logout() {
+    // Clear any local user data if necessary
+    Navigator.of(context).pushReplacement(MaterialPageRoute(
+      builder: (context) => const SignInScreen(), // Ensure you've imported this
+    ));
   }
 
   Future<void> _initializeData() async {
@@ -33,6 +53,7 @@ class _HomePageState extends State<HomePage> {
         isLoading = false;
       });
     }
+    updateCompletionPercentage(); // Update the percentage after loading data
   }
 
   final _controller = TextEditingController();
@@ -42,6 +63,7 @@ class _HomePageState extends State<HomePage> {
       widget.db.toDoList[index][1] = !widget.db.toDoList[index][1];
     });
     widget.db.updateDataBase();
+    updateCompletionPercentage(); // Update the percentage when a task is checked/unchecked
   }
 
   Future<void> saveNewTask(DateTime? dueDate, String? category) async {
@@ -51,6 +73,7 @@ class _HomePageState extends State<HomePage> {
       _controller.clear();
     });
     await widget.db.updateDataBase();
+    updateCompletionPercentage(); // Update the percentage when a new task is added
     _showSnackBar('Task Added !', Colors.green[600]!);
   }
 
@@ -71,6 +94,7 @@ class _HomePageState extends State<HomePage> {
       widget.db.toDoList.removeAt(index);
     });
     await widget.db.updateDataBase();
+    updateCompletionPercentage(); // Update the percentage when a task is deleted
     _showSnackBar('Task Deleted !', Colors.red[600]!);
   }
 
@@ -99,61 +123,116 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  Widget buildTaskCompletionProgressBar() {
+    return ValueListenableBuilder<double>(
+      valueListenable: completionPercentageNotifier,
+      builder: (context, value, child) {
+        return SimpleCircularProgressBar(
+          valueNotifier: completionPercentageNotifier,
+          progressStrokeWidth: 8,
+          backStrokeWidth: 8,
+          mergeMode: true,
+          maxValue: 100,
+          progressColors: const [
+            Color.fromARGB(255, 255, 1, 136),
+            Colors.cyan,
+            Colors.green,
+            Colors.amberAccent,
+            Colors.redAccent,
+          ],
+          backColor: Colors.grey.withOpacity(0.3),
+          onGetText: (double value) {
+            return Text(
+              '${value.toStringAsFixed(1)}%',
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Color.fromARGB(255, 254, 55, 151),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          toolbarHeight: 150,
-          title: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 24),
-              Text(
-                'Welcome',
-                style: GoogleFonts.blackOpsOne(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 48,
-                    textStyle: const TextStyle(letterSpacing: 1, height: 1.5)),
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        toolbarHeight:
+            250, // Adjust the height to fit the progress bar and other contents
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 24),
+            Text(
+              'Welcome',
+              style: GoogleFonts.blackOpsOne(
+                fontWeight: FontWeight.bold,
+                fontSize: 48,
+                textStyle: const TextStyle(letterSpacing: 1, height: 1.5),
               ),
-              const SizedBox(height: 8),
-              AnimatedTextKit(repeatForever: true, animatedTexts: [
+            ),
+            const SizedBox(height: 8),
+            AnimatedTextKit(
+              repeatForever: true,
+              animatedTexts: [
                 TyperAnimatedText(
-                  'What are your plans ?',
+                  'Tasks Completed...',
                   speed: const Duration(milliseconds: 100),
                   textStyle: const TextStyle(
-                      color: Color.fromARGB(255, 168, 167, 167),
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold),
+                    color: Color.fromARGB(255, 168, 167, 167),
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ]),
-            ],
+              ],
+            ),
+            const SizedBox(height: 10),
+            // Add the progress bar widget here
+            SizedBox(
+              height: 120, // Adjust the height as needed
+              child: buildTaskCompletionProgressBar(),
+            ),
+          ],
+        ),
+        actions: [
+          IconButton(
+            padding: const EdgeInsets.only(bottom: 130),
+            icon: const Icon(Icons.logout),
+            onPressed: _logout,
+            tooltip: 'Logout',
           ),
-        ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: createNewTask,
-          child: const Icon(Icons.add),
-        ),
-        body: isLoading
-            ? const Center(
-                child: CircularProgressIndicator(),
-              )
-            : MasonryGridView.count(
-                padding: const EdgeInsets.only(top: 16.0),
-                crossAxisCount: 2,
-                mainAxisSpacing: 8.0,
-                crossAxisSpacing: 8.0,
-                itemCount: widget.db.toDoList.length,
-                itemBuilder: (context, index) {
-                  return ToDoTile(
-                    taskName: widget.db.toDoList[index][0],
-                    taskCompleted: widget.db.toDoList[index][1],
-                    createdAt: widget.db.toDoList[index][2],
-                    dueDate: widget.db.toDoList[index][3],
-                    category: widget.db.toDoList[index][4],
-                    onChanged: (value) => checkBoxChanged(value, index),
-                    deleteFunction: (context) => deleteTask(index),
-                  );
-                },
-              ));
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: createNewTask,
+        child: const Icon(Icons.add),
+      ),
+      body: isLoading
+          ? const Center(
+              child: CircularProgressIndicator(),
+            )
+          : MasonryGridView.count(
+              padding: const EdgeInsets.only(top: 16.0),
+              crossAxisCount: 2,
+              mainAxisSpacing: 8.0,
+              crossAxisSpacing: 8.0,
+              itemCount: widget.db.toDoList.length,
+              itemBuilder: (context, index) {
+                return ToDoTile(
+                  taskName: widget.db.toDoList[index][0],
+                  taskCompleted: widget.db.toDoList[index][1],
+                  createdAt: widget.db.toDoList[index][2],
+                  dueDate: widget.db.toDoList[index][3],
+                  category: widget.db.toDoList[index][4],
+                  onChanged: (value) => checkBoxChanged(value, index),
+                  deleteFunction: (context) => deleteTask(index),
+                );
+              },
+            ),
+    );
   }
 }
