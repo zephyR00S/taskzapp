@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:lottie/lottie.dart';
 import 'package:taskzapp/util/login_screen.dart';
 import 'package:simple_circular_progress_bar/simple_circular_progress_bar.dart';
 import '../data/database.dart';
@@ -27,6 +28,16 @@ class _HomePageState extends State<HomePage> {
     _initializeData();
   }
 
+  void sortTasksByDueDate() {
+    widget.db.toDoList.sort((a, b) {
+      DateTime? dueDateA = a[3];
+      DateTime? dueDateB = b[3];
+      if (dueDateA == null) return 1;
+      if (dueDateB == null) return -1;
+      return dueDateA.compareTo(dueDateB);
+    });
+  }
+
   void updateCompletionPercentage() {
     int completedTasks =
         widget.db.toDoList.where((task) => task[1] == true).length;
@@ -51,6 +62,7 @@ class _HomePageState extends State<HomePage> {
     if (mounted) {
       setState(() {
         isLoading = false;
+        sortTasksByDueDate();
       });
     }
     updateCompletionPercentage(); // Update the percentage after loading data
@@ -159,53 +171,80 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         automaticallyImplyLeading: false,
-        toolbarHeight:
-            250, // Adjust the height to fit the progress bar and other contents
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 24),
-            Text(
-              'Welcome',
-              style: GoogleFonts.blackOpsOne(
-                fontWeight: FontWeight.bold,
-                fontSize: 48,
-                textStyle: const TextStyle(letterSpacing: 1, height: 1.5),
-              ),
-            ),
-            const SizedBox(height: 8),
-            AnimatedTextKit(
-              repeatForever: true,
-              animatedTexts: [
-                TyperAnimatedText(
-                  'Tasks Completed...',
-                  speed: const Duration(milliseconds: 100),
-                  textStyle: const TextStyle(
-                    color: Color.fromARGB(255, 168, 167, 167),
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+        toolbarHeight: 260,
+        flexibleSpace: Padding(
+          padding: const EdgeInsets.only(top: 60, left: 16, right: 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Welcome',
+                    style: GoogleFonts.blackOpsOne(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 40,
+                      textStyle:
+                          const TextStyle(letterSpacing: 0.5, height: 1.2),
+                    ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            // Add the progress bar widget here
-            SizedBox(
-              height: 120, // Adjust the height as needed
-              child: buildTaskCompletionProgressBar(),
-            ),
-          ],
-        ),
-        actions: [
-          IconButton(
-            padding: const EdgeInsets.only(bottom: 130),
-            icon: const Icon(Icons.logout),
-            onPressed: _logout,
-            tooltip: 'Logout',
+                  IconButton(
+                    icon: const Icon(Icons.logout, color: Colors.grey),
+                    onPressed: _logout,
+                    tooltip: 'Logout',
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              AnimatedTextKit(
+                repeatForever: true,
+                animatedTexts: [
+                  TyperAnimatedText(
+                    'Tasks Overview',
+                    speed: const Duration(milliseconds: 80),
+                    textStyle: const TextStyle(
+                      color: Colors.grey,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    flex: 3,
+                    child: SizedBox(
+                      height: 120,
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 16.0),
+                        child: buildTaskCompletionProgressBar(),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 2,
+                    child: SizedBox(
+                      height: 120,
+                      child: Lottie.asset(
+                        'assets/Lottie/Animation - 1719673032288.json',
+                        fit: BoxFit.contain,
+                        frameRate: const FrameRate(60.0),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-        ],
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: createNewTask,
@@ -222,6 +261,7 @@ class _HomePageState extends State<HomePage> {
               crossAxisSpacing: 8.0,
               itemCount: widget.db.toDoList.length,
               itemBuilder: (context, index) {
+                sortTasksByDueDate();
                 return ToDoTile(
                   taskName: widget.db.toDoList[index][0],
                   taskCompleted: widget.db.toDoList[index][1],

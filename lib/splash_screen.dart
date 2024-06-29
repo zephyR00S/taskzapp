@@ -16,8 +16,9 @@ class SplashScreen extends StatelessWidget {
           width: 300, // Adjust the width as per your requirement
           child: LottieBuilder.asset(
             "assets/Lottie/Animation - 1717667985450.json",
-            fit:
-                BoxFit.contain, // Ensure the animation fits within the SizedBox
+            fit: BoxFit.contain,
+            frameRate: const FrameRate(
+                60.0), // Ensure the animation fits within the SizedBox
           ),
         ),
       ),

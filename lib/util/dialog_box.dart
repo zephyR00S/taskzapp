@@ -67,7 +67,7 @@ class _DialogBoxState extends State<DialogBox> {
                 child: Lottie.asset(
                     'assets/Lottie/Animation - 1719331492962.json',
                     fit: BoxFit.contain,
-                    frameRate: const FrameRate(360.0)),
+                    frameRate: const FrameRate(60.0)),
               ),
               const SizedBox(
                 height: 10,

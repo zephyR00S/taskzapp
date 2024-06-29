@@ -106,6 +106,7 @@ class _SignInScreenState extends State<SignInScreen> {
             child: Lottie.asset(
               'assets/Lottie/Animation - 1719471964148.json',
               fit: BoxFit.cover,
+              frameRate: const FrameRate(60.0),
             ),
           ),
           // Login form
@@ -245,10 +246,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
         body: Stack(children: [
           // Lottie animation as background
           Positioned.fill(
-            child: Lottie.asset(
-              'assets/Lottie/Animation - 1719471964148.json',
-              fit: BoxFit.cover,
-            ),
+            child: Lottie.asset('assets/Lottie/Animation - 1719471964148.json',
+                fit: BoxFit.cover, frameRate: const FrameRate(60.0)),
           ),
 
           Padding(
