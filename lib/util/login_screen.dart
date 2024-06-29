@@ -15,6 +15,8 @@ class SignInScreen extends StatefulWidget {
 class _SignInScreenState extends State<SignInScreen> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  bool _rememberMe = false;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -37,6 +39,10 @@ class _SignInScreenState extends State<SignInScreen> {
   }
 
   void _signIn() async {
+    setState(() {
+      _isLoading = true;
+    });
+
     String username = _usernameController.text.trim();
     String password = _passwordController.text.trim();
 
@@ -57,16 +63,42 @@ class _SignInScreenState extends State<SignInScreen> {
           ));
         }
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Invalid username or password')),
-        );
+        _showSnackBar('Invalid username or password', Colors.red);
       }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text('Please enter a valid username and password')),
-      );
+      _showSnackBar('Enter a valid username and password', Colors.red);
     }
+
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  void _showSnackBar(String message, Color backgroundColor) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 12,
+          ),
+        ),
+        duration: const Duration(seconds: 1),
+        backgroundColor: backgroundColor,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        margin: EdgeInsets.only(
+            bottom: MediaQuery.of(context).size.height - 77,
+            right: 15,
+            left: 15),
+      ),
+    );
   }
 
   Future<void> _clearCredentials() async {
@@ -74,8 +106,6 @@ class _SignInScreenState extends State<SignInScreen> {
     await prefs.remove('username');
     await prefs.remove('password');
   }
-
-  bool _rememberMe = false;
 
   @override
   Widget build(BuildContext context) {
@@ -101,7 +131,6 @@ class _SignInScreenState extends State<SignInScreen> {
       ),
       body: Stack(
         children: [
-          // Lottie animation as background
           Positioned.fill(
             child: Lottie.asset(
               'assets/Lottie/Animation - 1719471964148.json',
@@ -109,7 +138,6 @@ class _SignInScreenState extends State<SignInScreen> {
               frameRate: const FrameRate(60.0),
             ),
           ),
-          // Login form
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
@@ -175,6 +203,13 @@ class _SignInScreenState extends State<SignInScreen> {
               ],
             ),
           ),
+          if (_isLoading)
+            Container(
+              color: Colors.black54,
+              child: const Center(
+                child: CircularProgressIndicator(),
+              ),
+            ),
         ],
       ),
     );
@@ -191,8 +226,13 @@ class SignUpScreen extends StatefulWidget {
 class _SignUpScreenState extends State<SignUpScreen> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  bool _isLoading = false;
 
   void _signUp() async {
+    setState(() {
+      _isLoading = true;
+    });
+
     String username = _usernameController.text.trim();
     String password = _passwordController.text.trim();
 
@@ -219,37 +259,45 @@ class _SignUpScreenState extends State<SignUpScreen> {
             content: Text('Please enter a valid username and password')),
       );
     }
+
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.transparent,
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
         backgroundColor: Colors.transparent,
-        extendBodyBehindAppBar: true,
-        appBar: AppBar(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          toolbarHeight: 80,
-          title: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Create ZAPP',
-                style: GoogleFonts.blackOpsOne(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 24,
-                    textStyle: const TextStyle(height: 2)),
-              )
-            ],
-          ),
+        elevation: 0,
+        toolbarHeight: 80,
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Create ZAPP',
+              style: GoogleFonts.blackOpsOne(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 24,
+                  textStyle: const TextStyle(height: 2)),
+            )
+          ],
         ),
-        body: Stack(children: [
-          // Lottie animation as background
+      ),
+      body: Stack(
+        children: [
           Positioned.fill(
-            child: Lottie.asset('assets/Lottie/Animation - 1719471964148.json',
-                fit: BoxFit.cover, frameRate: const FrameRate(60.0)),
+            child: Lottie.asset(
+              'assets/Lottie/Animation - 1719471964148.json',
+              fit: BoxFit.cover,
+              frameRate: const FrameRate(60.0),
+            ),
           ),
-
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
@@ -285,6 +333,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
               ],
             ),
           ),
-        ]));
+          if (_isLoading)
+            Container(
+              color: Colors.black54,
+              child: const Center(
+                child: CircularProgressIndicator(),
+              ),
+            ),
+        ],
+      ),
+    );
   }
 }
