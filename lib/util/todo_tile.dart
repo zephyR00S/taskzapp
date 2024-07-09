@@ -96,7 +96,7 @@ class ToDoTile extends StatelessWidget {
               ),
               if (dueDate != null)
                 Text(
-                  'Due: ${DateFormat('d MMMM, yyyy').format(dueDate!)}',
+                  'Due: ${DateFormat('d MMMM, yyyy, h:mm a').format(dueDate!)}',
                   style: GoogleFonts.shareTechMono(
                       fontSize: 13,
                       color: const Color.fromARGB(255, 0, 0, 0),

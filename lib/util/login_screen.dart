@@ -63,10 +63,14 @@ class _SignInScreenState extends State<SignInScreen> {
           ));
         }
       } else {
-        _showSnackBar('Invalid username or password', Colors.red);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Invalid Username or Password')),
+        );
       }
     } else {
-      _showSnackBar('Enter a valid username and password', Colors.red);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Enter a valid USername or Password')),
+      );
     }
 
     if (mounted) {
@@ -74,31 +78,6 @@ class _SignInScreenState extends State<SignInScreen> {
         _isLoading = false;
       });
     }
-  }
-
-  void _showSnackBar(String message, Color backgroundColor) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          message,
-          style: const TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            fontSize: 12,
-          ),
-        ),
-        duration: const Duration(seconds: 1),
-        backgroundColor: backgroundColor,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
-        margin: EdgeInsets.only(
-            bottom: MediaQuery.of(context).size.height - 77,
-            right: 15,
-            left: 15),
-      ),
-    );
   }
 
   Future<void> _clearCredentials() async {

@@ -38,7 +38,7 @@ class DialogBox extends StatefulWidget {
 }
 
 class _DialogBoxState extends State<DialogBox> {
-  DateTime? _selectedDate;
+  DateTime? _selectedDateTime;
   String? _selectedCategory;
   final List<String> _categories = [
     'default',
@@ -89,18 +89,18 @@ class _DialogBoxState extends State<DialogBox> {
                     child: TextField(
                       readOnly: true,
                       decoration: InputDecoration(
-                        labelText: 'Date',
+                        labelText: ' Select Date and Time',
                         border: const OutlineInputBorder(),
                         suffixIcon: IconButton(
                           icon: const Icon(Icons.calendar_today),
                           onPressed: () {
-                            _showDatePicker(context);
+                            _showDateTimePicker(context);
                           },
                         ),
                       ),
                       controller: TextEditingController(
-                        text: _selectedDate != null
-                            ? '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}'
+                        text: _selectedDateTime != null
+                            ? '${_selectedDateTime!.day}/${_selectedDateTime!.month}/${_selectedDateTime!.year} ${_selectedDateTime!.hour}:${_selectedDateTime!.minute.toString().padLeft(2, '0')}'
                             : '',
                       ),
                     ),
@@ -147,8 +147,8 @@ class _DialogBoxState extends State<DialogBox> {
                     iconData: Icons.check,
                     onPressed: () {
                       widget.onSave(
-                          _selectedDate, _selectedCategory ?? 'default');
-                      _selectedDate = null;
+                          _selectedDateTime, _selectedCategory ?? 'default');
+                      _selectedDateTime = null;
                       _selectedCategory = null;
                       Navigator.of(context).pop();
                     },
@@ -162,16 +162,30 @@ class _DialogBoxState extends State<DialogBox> {
     );
   }
 
-  void _showDatePicker(BuildContext context) {
+  void _showDateTimePicker(BuildContext context) {
     showDatePicker(
       context: context,
-      initialDate: _selectedDate ?? DateTime.now(),
+      initialDate: _selectedDateTime ?? DateTime.now(),
       firstDate: DateTime.now(),
       lastDate: DateTime(2100),
     ).then((pickedDate) {
       if (pickedDate != null) {
-        setState(() {
-          _selectedDate = pickedDate;
+        showTimePicker(
+          context: context,
+          initialTime:
+              TimeOfDay.fromDateTime(_selectedDateTime ?? DateTime.now()),
+        ).then((pickedTime) {
+          if (pickedTime != null) {
+            setState(() {
+              _selectedDateTime = DateTime(
+                pickedDate.year,
+                pickedDate.month,
+                pickedDate.day,
+                pickedTime.hour,
+                pickedTime.minute,
+              );
+            });
+          }
         });
       }
     });
