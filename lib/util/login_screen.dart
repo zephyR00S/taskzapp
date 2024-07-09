@@ -69,7 +69,7 @@ class _SignInScreenState extends State<SignInScreen> {
       }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Enter a valid USername or Password')),
+        const SnackBar(content: Text('Enter a valid Username or Password')),
       );
     }
 
