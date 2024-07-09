@@ -32,7 +32,7 @@ class ToDoDataBase {
   // Create initial data
   Future<void> createInitialData() async {
     toDoList = [
-      ["Click + to write..", false, DateTime.now(), null, 'Default'],
+      ["Click + to write..", false, DateTime.now(), 'dueDate', 'Default'],
     ];
     await updateDataBase();
   }
@@ -56,7 +56,7 @@ class ToDoDataBase {
                 'title': todo[0],
                 'completed': todo[1],
                 'createdAt': todo[2].toIso8601String(),
-                'completedAt': todo[3]?.toIso8601String(),
+                'dueDate': todo[3]?.toIso8601String(),
                 'category': todo[4],
               })
           .toList();
@@ -79,8 +79,8 @@ class ToDoDataBase {
                 todo['title'],
                 todo['completed'],
                 DateTime.parse(todo['createdAt']),
-                todo['completedAt'] != null
-                    ? DateTime.parse(todo['completedAt'])
+                todo['dueDate'] != null
+                    ? DateTime.parse(todo['dueDate'])
                     : null,
                 todo['category'],
               ])
