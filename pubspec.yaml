@@ -46,6 +46,7 @@ dependencies:
   crypto: ^3.0.3
   shared_preferences: ^2.2.3
   simple_circular_progress_bar: ^1.0.2
+  connectivity_plus: ^6.0.3
   
   
 

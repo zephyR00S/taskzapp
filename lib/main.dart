@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:taskzapp/splash_screen.dart';
+import 'package:taskzapp/util/splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

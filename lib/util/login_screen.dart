@@ -1,9 +1,13 @@
+import 'dart:async';
+
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:taskzapp/data/database.dart';
 import 'package:taskzapp/home_page.dart';
+import 'package:taskzapp/util/dialog.dart';
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
@@ -17,11 +21,45 @@ class _SignInScreenState extends State<SignInScreen> {
   final TextEditingController _passwordController = TextEditingController();
   bool _rememberMe = false;
   bool _isLoading = false;
+  late StreamSubscription<List<ConnectivityResult>> _connectivitySubscription;
+  bool _hasInternetConnection = true;
+  BuildContext? _dialogContext;
 
   @override
   void initState() {
     super.initState();
     _loadSavedCredentials();
+    checkInternetConnection().then((value) {
+      setState(() {
+        _hasInternetConnection = value;
+      });
+      if (!value) {
+        _showNoInternetDialog();
+      }
+    });
+
+    _connectivitySubscription = Connectivity()
+        .onConnectivityChanged
+        .listen((List<ConnectivityResult> result) {
+      bool hasInternet = result.contains(ConnectivityResult.mobile) ||
+          result.contains(ConnectivityResult.wifi);
+      setState(() {
+        _hasInternetConnection = hasInternet;
+      });
+      if (!hasInternet) {
+        _showNoInternetDialog();
+      } else {
+        _dismissNoInternetDialog();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _connectivitySubscription.cancel();
+    _dismissNoInternetDialog();
+    super.dispose();
+    super.dispose();
   }
 
   Future<void> _loadSavedCredentials() async {
@@ -32,13 +70,43 @@ class _SignInScreenState extends State<SignInScreen> {
     });
   }
 
+  Future<bool> checkInternetConnection() async {
+    var connectivityResult = await (Connectivity().checkConnectivity());
+    return connectivityResult.contains(ConnectivityResult.mobile) ||
+        connectivityResult.contains(ConnectivityResult.wifi);
+  }
+
   Future<void> _saveCredentials(String username, String password) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('username', username);
     await prefs.setString('password', password);
   }
 
+  void _showNoInternetDialog() {
+    if (_dialogContext == null) {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext dialogContext) {
+          _dialogContext = dialogContext;
+          return const NoInternetDialog();
+        },
+      );
+    }
+  }
+
+  void _dismissNoInternetDialog() {
+    if (_dialogContext != null) {
+      Navigator.of(_dialogContext!).pop();
+      _dialogContext = null;
+    }
+  }
+
   void _signIn() async {
+    if (!_hasInternetConnection) {
+      _showNoInternetDialog();
+      return;
+    }
     setState(() {
       _isLoading = true;
     });
